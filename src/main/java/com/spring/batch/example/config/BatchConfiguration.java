@@ -15,6 +15,7 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -62,8 +63,8 @@ public class BatchConfiguration {
 
     // tag::jobstep[]
     @Bean
-    public Job importUserJob(JobCompletionNotificationListener listener, Step step1) {
-        return jobBuilderFactory.get("importUserJob")
+    public Job importUserJob1(JobCompletionNotificationListener listener, @Qualifier("step1") Step step1) {
+        return jobBuilderFactory.get("importUserJob1")
             .incrementer(new RunIdIncrementer())
             .listener(listener)
             .flow(step1)
@@ -71,7 +72,7 @@ public class BatchConfiguration {
             .build();
     }
 
-    @Bean
+    @Bean(name = "step1")
     public Step step1(JdbcBatchItemWriter<Person> writer) {
         return stepBuilderFactory.get("step1")
             .<Person, Person> chunk(2)
