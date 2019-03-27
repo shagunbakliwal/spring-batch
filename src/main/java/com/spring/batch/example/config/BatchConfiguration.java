@@ -71,10 +71,30 @@ public class BatchConfiguration {
             .end()
             .build();
     }
+    
+    @Bean
+	public Job importUserJob2(JobCompletionNotificationListener listener, @Qualifier("step2") Step step2) {
+		return jobBuilderFactory.get("importUserJob2")
+            .incrementer(new RunIdIncrementer())
+            .listener(listener)
+            .flow(step2)
+            .end()
+            .build();
+	}
 
     @Bean(name = "step1")
     public Step step1(JdbcBatchItemWriter<Person> writer) {
         return stepBuilderFactory.get("step1")
+            .<Person, Person> chunk(2)
+            .reader(reader())
+            .processor(personItemProcessor)
+            .writer(writer)
+            .build();
+    }
+    
+    @Bean(name = "step2")
+    public Step step2(JdbcBatchItemWriter<Person> writer) {
+        return stepBuilderFactory.get("step2")
             .<Person, Person> chunk(2)
             .reader(reader())
             .processor(personItemProcessor)
